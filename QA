@@ -21,8 +21,7 @@ check_PSUF=$(omreport chassis pwrsupplies|grep Critical | echo "PSU Failure Dete
 check_CMOS=$(omreport chassis batteries|grep Status|cut -d: -f2)
 check_Drives=$(omreport storage pdisk controller=0|grep State|cut -d: -f2)
 check_Drive_Count=$(omreport storage pdisk controller=0|grep State -c)
-check_DHealth=$(./HDSentinel|grep 'Health\|Performance\|Serial\|Model\|Size'>> /usr/local/bin/HDSentInfo)
-
+check_DHealth=$(HDSentinel|grep 'Health\|Performance\|Serial\|Model\|Size'>> /usr/local/bin/HDSentInfo)
 
 echo -n "Model: "
 echo $check_MODEL
