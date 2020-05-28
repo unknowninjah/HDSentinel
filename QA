@@ -1,0 +1,62 @@
+#!/bin/sh
+clear
+
+DATE=$(date +"%m-%d-%y")
+
+echo "---------------------------------------------------"
+echo -n $DATE
+echo " Dc-Ops QA      v1.0"
+echo "---------------------------------------------------"
+
+check_MEMORY=$(omreport chassis memory|grep Health|cut -d: -f2)
+check_RAM_Ammount=$(omreport chassis memory|grep 'Total Installed Capacity\|Total Maximum Capacity'|grep -v Avail >> /usr/local/bin/MEM)
+check_MODEL=$( omreport chassis info|grep Model|cut -d: -f2)
+check_STAG=$(omreport chassis info|grep 'Chassis Service Tag'|cut -d: -f2)
+check_BiosVersion=$(omreport chassis bios|grep Version|cut -d: -f2)
+check_R_Controller_Name=$(omreport storage controller|grep 'Name'|cut -d: -f2)
+check_R_Controller_Info=$(omreport storage controller|grep 'Name\|^State\|Firmware Version\|Minimum Required Firmware Version' >> /usr/local/bin/CtrlrInfo)
+check_ROMB=$(omreport storage battery|grep ^State|cut -d: -f2)
+check_PSU=$(/opt/dell/srvadmin/bin/omreport chassis pwrsupplies|grep '^Status\|Index\|Rated')
+check_PSUF=$(omreport chassis pwrsupplies|grep Critical | echo "PSU Failure Detected")
+check_CMOS=$(omreport chassis batteries|grep Status|cut -d: -f2)
+check_Drives=$(omreport storage pdisk controller=0|grep State|cut -d: -f2)
+check_Drive_Count=$(omreport storage pdisk controller=0|grep State -c)
+check_DHealth=$(./HDSentinel|grep 'Health\|Performance\|Serial\|Model\|Size'>> /usr/local/bin/HDSentInfo)
+
+
+echo -n "Model: "
+echo $check_MODEL
+echo -n "Service Tag: "
+echo $check_STAG
+echo -n "Bios Version: "
+echo $check_BiosVersion
+echo
+
+echo "Raid Controller: "
+cat /usr/local/bin/CtrlrInfo
+rm -rf /usr/local/bin/CtrlrInfo
+echo
+
+echo -n "RAM: "
+echo $check_MEMORY
+cat /usr/local/bin/MEM
+rm -rf /usr/local/bin/MEM
+echo
+echo -n "ROMB: "
+echo $check_ROMB
+echo
+echo -n "CMOS: "
+echo $check_CMOS
+echo
+echo -n "Power Supplies: "
+#echo $check_PSU
+echo $check_PSUF
+echo
+
+echo -n "Drives Detected: "
+echo $check_Drive_Count
+echo
+echo "Drive Information: "
+cat /usr/local/bin/HDSentInfo
+rm -rf /usr/local/bin/HDSentInfo
+echo
